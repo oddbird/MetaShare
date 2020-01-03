@@ -41,7 +41,9 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        return Project.objects.create(name=name, description=description, **kwargs)
+        return Project.objects.create(
+            name=name, description=description, commits=[], **kwargs
+        )
 
     def create_task(self, **kwargs):
         name = kwargs.pop("name", "Sample Task")

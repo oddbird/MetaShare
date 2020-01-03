@@ -298,9 +298,30 @@ GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
 GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
 
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {"SCOPE": GITHUB_OAUTH_SCOPES},
-    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+    "github": {
+        "SCOPE": GITHUB_OAUTH_SCOPES,
+        "APP": {
+            "client_id": env("GITHUB_CLIENT_ID"),
+            "secret": env("GITHUB_CLIENT_SECRET"),
+            "key": env("GITHUB_CLIENT_KEY"),
+        },
+    },
+    "salesforce-production": {
+        "SCOPE": ["web", "full", "refresh_token"],
+        "APP": {
+            "client_id": env("SF_CLIENT_ID"),
+            "secret": env("SF_CLIENT_SECRET"),
+            "key": env("SF_CLIENT_KEY"),
+        },
+    },
+    "salesforce-custom": {
+        "SCOPE": ["web", "full", "refresh_token"],
+        "APP": {
+            "client_id": env("SF_CLIENT_ID"),
+            "secret": env("SF_CLIENT_SECRET"),
+            "key": env("SF_CLIENT_KEY"),
+        },
+    },
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False

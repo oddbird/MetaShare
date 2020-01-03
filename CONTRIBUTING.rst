@@ -43,6 +43,9 @@ Docker-based development
     SF_CLIENT_KEY=...
     SF_CLIENT_ID=...
     SF_CLIENT_SECRET=...
+    GITHUB_CLIENT_KEY=...
+    GITHUB_CLIENT_ID=...
+    GITHUB_CLIENT_SECRET=...
     GITHUB_HOOK_SECRET=...
 
    Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
@@ -68,18 +71,8 @@ Docker-based development
 Logging in with GitHub
 ----------------------
 
-To setup OAuth integration, run the ``populate_social_apps`` management command.
-The values to use for ``--gh-id``, ``--gh-secret``, ``--sf-id`` and
-``--sf-secret`` can be found in the GitHub App and Salesforce App, respectively,
-or if you're an OddBird you can find these values in the shared Keybase team
-folder (``metashare/prod.db``). If you've successfully set your ``SF_CLIENT_ID``
-and ``SF_CLIENT_SECRET`` environment variables above in step 2, you only need to
-add GitHub keys here::
-
-    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
-
-Once you've done that and successfully logged in, you probably want to make your
-user a superuser. You can do that easily via the ``promote_superuser``
+Once you've successfully logged in, you probably want to make your user
+a superuser. You can do that easily via the ``promote_superuser``
 management command::
 
     $ docker-compose run --rm web python manage.py promote_superuser <your email>

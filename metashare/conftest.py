@@ -1,6 +1,6 @@
 import factory
 import pytest
-from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
+from allauth.socialaccount.models import SocialAccount, SocialToken
 from django.contrib.auth import get_user_model
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
@@ -11,14 +11,14 @@ from .api.models import GitHubRepository, Project, Repository, ScratchOrg, Task
 User = get_user_model()
 
 
-@register
-class SocialAppFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = SocialApp
-        django_get_or_create = ("provider",)
+# @register
+# class SocialAppFactory(factory.django.DjangoModelFactory):
+#     class Meta:
+#         model = SocialApp
+#         django_get_or_create = ("provider",)
 
-    name = "GitHub"
-    provider = "github"
+#     name = "GitHub"
+#     provider = "github"
 
 
 @register
@@ -28,7 +28,7 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
 
     token = fernet_encrypt("0123456789abcdef")
     token_secret = "secret.0123456789abcdef"
-    app = factory.SubFactory(SocialAppFactory)
+    # app = factory.SubFactory(SocialAppFactory)
 
 
 @register
