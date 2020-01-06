@@ -301,25 +301,25 @@ SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "SCOPE": GITHUB_OAUTH_SCOPES,
         "APP": {
-            "client_id": env("GITHUB_CLIENT_ID"),
-            "secret": env("GITHUB_CLIENT_SECRET"),
-            "key": env("GITHUB_CLIENT_KEY"),
+            "client_id": env("GITHUB_CLIENT_ID", default=''),
+            "secret": env("GITHUB_CLIENT_SECRET", default=''),
+            "key": env("GITHUB_CLIENT_KEY", default=''),
         },
     },
     "salesforce-production": {
         "SCOPE": ["web", "full", "refresh_token"],
         "APP": {
-            "client_id": env("SF_CLIENT_ID"),
-            "secret": env("SF_CLIENT_SECRET"),
-            "key": env("SF_CLIENT_KEY"),
+            "client_id": env("SF_CLIENT_ID", default=''),
+            "secret": env("SF_CLIENT_SECRET", default=''),
+            "key": env("SF_CLIENT_KEY", default=''),
         },
     },
     "salesforce-custom": {
         "SCOPE": ["web", "full", "refresh_token"],
         "APP": {
-            "client_id": env("SF_CLIENT_ID"),
-            "secret": env("SF_CLIENT_SECRET"),
-            "key": env("SF_CLIENT_KEY"),
+            "client_id": env("SF_CLIENT_ID", default=''),
+            "secret": env("SF_CLIENT_SECRET", default=''),
+            "key": env("SF_CLIENT_KEY", default=''),
         },
     },
 }
