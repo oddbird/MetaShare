@@ -137,6 +137,12 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
+    @action(detail=True, methods=["POST"])
+    def refresh_github_users(self, request, pk=None):
+        instance = self.get_object()
+        instance.queue_populate_github_users()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
 
 class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -176,14 +182,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        if self.request.user.sf_username == instance.owner_sf_id:
+        if self.request.user == instance.owner:
             instance.queue_delete()
         else:
             raise PermissionDenied(
-                _(
-                    "User is not connected to Salesforce as the same Salesforce user "
-                    "who created the ScratchOrg."
-                )
+                _("User is not the same user who created the ScratchOrg.")
             )
 
     def list(self, request, *args, **kwargs):
