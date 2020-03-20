@@ -21,7 +21,7 @@ class TestRunRetrieveTask:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.MetashareCumulusCIRuntime"))
             stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_valid_target_directories = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_valid_target_directories")
@@ -44,7 +44,7 @@ class TestRunRetrieveTask:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.MetashareCumulusCIRuntime"))
             stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_valid_target_directories = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_valid_target_directories")
@@ -67,7 +67,7 @@ class TestRunRetrieveTask:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.MetashareCumulusCIRuntime"))
             stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_valid_target_directories = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_valid_target_directories")

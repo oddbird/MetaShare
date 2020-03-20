@@ -4,7 +4,6 @@ from datetime import datetime
 from unittest.mock import Mock
 
 from cumulusci.core.config import OrgConfig, TaskConfig
-from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from cumulusci.utils import cd
@@ -14,6 +13,8 @@ from django_rq import get_scheduler
 from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
+
+from .custom_cci_configs import MetashareCumulusCIRuntime
 
 # Salesforce connected app
 # Assign these locally, for brevity:
@@ -241,7 +242,7 @@ def create_org(
     devhub_username = sf_username or user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 
-    cci = BaseCumulusCI(
+    cci = MetashareCumulusCIRuntime(
         repo_info={
             "root": project_path,
             "url": repo_url,

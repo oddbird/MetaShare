@@ -177,7 +177,7 @@ class TestDeployOrgSettings:
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.MetashareCumulusCIRuntime"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
         get_org_details = stack.enter_context(patch(f"{PATCH_ROOT}.get_org_details"))
         get_org_details.return_value = (MagicMock(), MagicMock())
