@@ -10,6 +10,7 @@ import {
   ExternalLink,
   LabelWithSpinner,
   useForm,
+  useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -57,18 +58,18 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this task for review');
-      submittingLabel = i18n.t('Submitting Task for Review…');
-      toSubmitLabel = i18n.t('Submit Task for Review');
+      heading = i18n.t('Submit this task for testing');
+      submittingLabel = i18n.t('Submitting Task for Testing…');
+      toSubmitLabel = i18n.t('Submit Task for Testing');
       break;
     case 'project':
       objectType = {
         objectType: OBJECT_TYPES.PROJECT_PR,
         url: window.api_urls.project_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this project for review');
-      submittingLabel = i18n.t('Submitting Project for Review…');
-      toSubmitLabel = i18n.t('Submit Project for Review');
+      heading = i18n.t('Submit this project for review on GitHub');
+      submittingLabel = i18n.t('Submitting Project for Review on GitHub…');
+      toSubmitLabel = i18n.t('Submit Project for Review on GitHub');
       break;
   }
 
@@ -76,6 +77,7 @@ const SubmitModal = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   } = useForm({
@@ -90,6 +92,14 @@ const SubmitModal = ({
     onError: handleError,
     shouldSubscribeToObject: false,
     ...objectType,
+  });
+
+  // When name changes, update default selection
+  useFormDefaults({
+    field: 'title',
+    value: instanceName,
+    inputs,
+    setInputs,
   });
 
   const handleSubmitClicked = () => {

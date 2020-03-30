@@ -2,7 +2,7 @@ import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
 import { isCurrentUser } from '@/store/helpers';
-import { Org } from '@/store/orgs/reducer';
+import { MinimalOrg, Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
@@ -14,7 +14,7 @@ interface OrgProvisioned {
 }
 interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
-  payload: Org;
+  payload: Org | MinimalOrg;
 }
 interface RefetchOrg {
   type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
@@ -26,7 +26,7 @@ interface OrgUpdated {
 }
 interface OrgDeleted {
   type: 'SCRATCH_ORG_DELETE';
-  payload: Org;
+  payload: Org | MinimalOrg;
 }
 interface OrgDeleteFailed {
   type: 'SCRATCH_ORG_DELETE_FAILED';
@@ -37,11 +37,12 @@ interface CommitEvent {
   payload: Org;
 }
 interface OrgRefresh {
-  type:
-    | 'SCRATCH_ORG_REFRESH_REQUESTED'
-    | 'SCRATCH_ORG_REFRESH_ACCEPTED'
-    | 'SCRATCH_ORG_REFRESH_REJECTED';
+  type: 'SCRATCH_ORG_REFRESH_REQUESTED' | 'SCRATCH_ORG_REFRESH_ACCEPTED';
   payload: Org;
+}
+interface OrgRefreshRejected {
+  type: 'SCRATCH_ORG_REFRESH_REJECTED';
+  payload: Org | MinimalOrg;
 }
 
 export type OrgsAction =
@@ -52,7 +53,8 @@ export type OrgsAction =
   | OrgDeleted
   | OrgDeleteFailed
   | CommitEvent
-  | OrgRefresh;
+  | OrgRefresh
+  | OrgRefreshRejected;
 
 export const provisionOrg = ({
   model,
@@ -66,17 +68,17 @@ export const provisionOrg = ({
   if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     let msg = {
-      [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
-      [ORG_TYPES.QA]: i18n.t('Successfully created Review org.'),
+      [ORG_TYPES.DEV]: i18n.t('Successfully created Dev Org.'),
+      [ORG_TYPES.QA]: i18n.t('Successfully created Test Org.'),
     };
     if (task) {
       msg = {
-        [ORG_TYPES.DEV]: `${i18n.t('Successfully created Dev org for task')} “${
+        [ORG_TYPES.DEV]: `${i18n.t('Successfully created Dev Org for task')} “${
           task.name
         }”.`,
-        [ORG_TYPES.QA]: `${i18n.t(
-          'Successfully created Review org for task',
-        )} “${task.name}”.`,
+        [ORG_TYPES.QA]: `${i18n.t('Successfully created Test Org for task')} “${
+          task.name
+        }”.`,
       };
     }
     dispatch(
@@ -101,7 +103,7 @@ export const provisionFailed = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
 }): ThunkResult<OrgProvisionFailed> => (dispatch, getState) => {
@@ -110,19 +112,19 @@ export const provisionFailed = ({
     const task = selectTaskById(state, model.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t(
-        'Uh oh. There was an error creating your new Dev org.',
+        'Uh oh. There was an error creating your new Dev Org.',
       ),
       [ORG_TYPES.QA]: i18n.t(
-        'Uh oh. There was an error creating your new Review org.',
+        'Uh oh. There was an error creating your new Test Org.',
       ),
     };
     if (task) {
       msg = {
         [ORG_TYPES.DEV]: `${i18n.t(
-          'Uh oh. There was an error creating your new Dev org for task',
+          'Uh oh. There was an error creating your new Dev Org for task',
         )} “${task.name}”.`,
         [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error creating your new Review org for task',
+          'Uh oh. There was an error creating your new Test Org for task',
         )} “${task.name}”.`,
       };
     }
@@ -216,7 +218,7 @@ export const deleteOrg = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
 }): ThunkResult<OrgDeleted> => (dispatch, getState) => {
@@ -230,7 +232,7 @@ export const deleteOrg = ({
     // prevent that, but another solution could be for the reducer to ignore
     // orgs that have already been removed.
     //
-    // See https://github.com/oddbird/MetaShare/pull/79#discussion_r347644315
+    // See https://github.com/oddbird/Metecho/pull/79#discussion_r347644315
     window.socket.unsubscribe({
       model: OBJECT_TYPES.ORG,
       id: model.id,
@@ -251,17 +253,17 @@ export const deleteOrg = ({
     } else {
       const task = selectTaskById(state, model.task);
       let msg = {
-        [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
-        [ORG_TYPES.QA]: i18n.t('Successfully deleted Review org.'),
+        [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev Org.'),
+        [ORG_TYPES.QA]: i18n.t('Successfully deleted Test Org.'),
       };
       /* istanbul ignore else */
       if (task) {
         msg = {
           [ORG_TYPES.DEV]: `${i18n.t(
-            'Successfully deleted Dev org for task',
+            'Successfully deleted Dev Org for task',
           )} “${task.name}”.`,
           [ORG_TYPES.QA]: `${i18n.t(
-            'Successfully deleted Review org for task',
+            'Successfully deleted Test Org for task',
           )} “${task.name}”.`,
         };
       }
@@ -289,20 +291,20 @@ export const deleteFailed = ({
     const task = selectTaskById(state, model.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t(
-        'Uh oh. There was an error deleting your Dev org.',
+        'Uh oh. There was an error deleting your Dev Org.',
       ),
       [ORG_TYPES.QA]: i18n.t(
-        'Uh oh. There was an error deleting your Review org.',
+        'Uh oh. There was an error deleting your Test Org.',
       ),
     };
     /* istanbul ignore else */
     if (task) {
       msg = {
         [ORG_TYPES.DEV]: `${i18n.t(
-          'Uh oh. There was an error deleting your Dev org for task',
+          'Uh oh. There was an error deleting your Dev Org for task',
         )} “${task.name}”.`,
         [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error deleting your Review org for task',
+          'Uh oh. There was an error deleting your Test Org for task',
         )} “${task.name}”.`,
       };
     }
@@ -335,9 +337,9 @@ export const commitSucceeded = ({
       addToast({
         heading: task
           ? `${i18n.t(
-              'Successfully captured changes from your scratch org on task',
+              'Successfully retrieved changes from your scratch org on task',
             )} “${task.name}”.`
-          : i18n.t('Successfully captured changes from your scratch org.'),
+          : i18n.t('Successfully retrieved changes from your scratch org.'),
       }),
     );
   }
@@ -364,10 +366,10 @@ export const commitFailed = ({
       addToast({
         heading: task
           ? `${i18n.t(
-              'Uh oh. There was an error capturing changes from your scratch org on task',
+              'Uh oh. There was an error retrieving changes from your scratch org on task',
             )} “${task.name}”.`
           : i18n.t(
-              'Uh oh. There was an error capturing changes from your scratch org.',
+              'Uh oh. There was an error retrieving changes from your scratch org.',
             ),
         details: message,
         variant: 'error',
@@ -434,10 +436,10 @@ export const refreshError = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
-}): ThunkResult<OrgUpdated> => (dispatch, getState) => {
+}): ThunkResult<OrgUpdated | OrgRefreshRejected> => (dispatch, getState) => {
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
@@ -454,5 +456,11 @@ export const refreshError = ({
       }),
     );
   }
-  return dispatch(updateOrg(model));
+  if ((model as Org).owner) {
+    return dispatch(updateOrg(model as Org));
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_REFRESH_REJECTED',
+    payload: model,
+  });
 };
