@@ -13,16 +13,11 @@ import OrgSpinner from '@/components/tasks/cards/orgSpinner';
 import RefreshOrgModal from '@/components/tasks/cards/refresh';
 import SubmitReviewModal from '@/components/tasks/cards/submitReview';
 import UserActions from '@/components/tasks/cards/userActions';
-import { AssignUserModal, UserCard } from '@/components/user/githubUser';
+import { UserCard } from '@/components/user/githubUser';
 import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
-import { addUrlParams } from '@/utils/api';
-import {
-  ORG_TYPES,
-  OrgTypes,
-  SHOW_PROJECT_COLLABORATORS,
-} from '@/utils/constants';
+import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 import { getTaskCommits } from '@/utils/helpers';
 import { logError } from '@/utils/logging';
 
@@ -46,6 +41,7 @@ interface OrgCardProps {
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
   openCaptureModal?: () => void;
+  openAssignUserModal: (type?: OrgTypes) => void;
 }
 
 const OrgCard = ({
@@ -53,8 +49,6 @@ const OrgCard = ({
   type,
   user,
   task,
-  projectUsers,
-  projectUrl,
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
@@ -64,7 +58,7 @@ const OrgCard = ({
   handleCheckForOrgChanges,
   handleRefresh,
   openCaptureModal,
-  history,
+  openAssignUserModal,
 }: OrgCardProps & RouteComponentProps) => {
   const assignedUser =
     type === ORG_TYPES.QA ? task.assigned_qa : task.assigned_dev;
@@ -94,15 +88,6 @@ const OrgCard = ({
     // eslint-disable-next-line no-param-reassign
     org = null;
   }
-
-  // assign user modal related
-  const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  const openAssignUserModal = () => {
-    setAssignUserModalOpen(true);
-  };
-  const closeAssignUserModal = () => {
-    setAssignUserModalOpen(false);
-  };
 
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
@@ -149,12 +134,6 @@ const OrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-
-  const handleEmptyMessageClick = useCallback(() => {
-    history.push(
-      addUrlParams(projectUrl, { [SHOW_PROJECT_COLLABORATORS]: true }),
-    );
-  }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
@@ -279,7 +258,7 @@ const OrgCard = ({
           </>
         )}
       </Card>
-      <AssignUserModal
+      {/* <AssignUserModal
         allUsers={projectUsers}
         selectedUser={assignedUser}
         orgType={type}
@@ -288,7 +267,7 @@ const OrgCard = ({
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
-      />
+      /> */}
       {testOrgOutOfDate && (
         <RefreshOrgModal
           orgUrl={window.api_urls.scratch_org_redirect(org?.id)}

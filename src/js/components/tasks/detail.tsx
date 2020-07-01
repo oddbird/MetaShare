@@ -10,10 +10,12 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
+import { Step } from '@/components/steps/stepsItem';
 import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
+import { AssignUserModal } from '@/components/user/githubUser';
 import {
   DeleteModal,
   DetailPageLayout,
@@ -35,12 +37,15 @@ import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
-import { User } from '@/store/user/reducer';
+import { GitHubUser, User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
+import { addUrlParams } from '@/utils/api';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
+  OrgTypes,
   REVIEW_STATUSES,
+  SHOW_PROJECT_COLLABORATORS,
   TASK_STATUSES,
 } from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
@@ -52,6 +57,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes | null>(null);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -137,7 +144,48 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
-
+  // Assign user modal related
+  const openAssignUserModal = (type?: OrgTypes) => {
+    if (type) {
+      setCurrentOrgType(type);
+    }
+    setAssignUserModalOpen(true);
+  };
+  const closeAssignUserModal = () => {
+    setCurrentOrgType(null);
+    setAssignUserModalOpen(false);
+  };
+  const handleStepAction = useCallback((step: Step) => {
+    const action = step.action;
+    switch (action) {
+      case 'assign-dev':
+        openAssignUserModal(ORG_TYPES.DEV);
+        break;
+    }
+  }, []);
+  // eslint-disable-next-line one-var
+  let projectUrl = '';
+  if (repository && project) {
+    projectUrl = routes.project_detail(repository.slug, project.slug);
+  }
+  const handleEmptyMessageClick = useCallback(() => {
+    if (projectUrl) {
+      props.history.push(
+        addUrlParams(projectUrl, { [SHOW_PROJECT_COLLABORATORS]: true }),
+      );
+    }
+  }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+  const assignedUser =
+    currentOrgType === ORG_TYPES.QA ? task?.assigned_qa : task?.assigned_dev;
+  const doAssignUser = useCallback(
+    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+      // eslint-disable-next-line no-console
+      console.log(assignee, shouldAlertAssignee);
+      // handleAssignUser({ type, assignee, shouldAlertAssignee });
+    },
+    [],
+    // [handleAssignUser, type],
+  );
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -328,8 +376,6 @@ const TaskDetail = (props: RouteComponentProps) => {
       />
     );
   }
-
-  const projectUrl = routes.project_detail(repository.slug, project.slug);
   let headerUrl, headerUrlText; // eslint-disable-line one-var
   /* istanbul ignore else */
   if (task.branch_url && task.branch_name) {
@@ -373,7 +419,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large ms-secondary-block">
-                <TaskStatusSteps task={task} orgs={orgs} />
+                <TaskStatusSteps
+                  task={task}
+                  orgs={orgs}
+                  handleAction={handleStepAction}
+                />
               </div>
             ) : null}
           </>
@@ -390,6 +440,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             projectUrl={projectUrl}
             repoUrl={repository.repo_url}
             openCaptureModal={openCaptureModal}
+            openAssignUserModal={openAssignUserModal}
           />
         ) : (
           <SpinnerWrapper />
@@ -429,6 +480,16 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={deleteModalOpen}
           redirect={projectUrl}
           handleClose={closeDeleteModal}
+        />
+        <AssignUserModal
+          allUsers={project.github_users}
+          selectedUser={assignedUser}
+          orgType={currentOrgType}
+          isOpen={assignUserModalOpen}
+          emptyMessageText={i18n.t('View Project to Add Collaborators')}
+          emptyMessageAction={handleEmptyMessageClick}
+          onRequestClose={closeAssignUserModal}
+          setUser={doAssignUser}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
