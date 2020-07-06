@@ -58,7 +58,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes | null>(null);
+  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes>();
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -146,13 +146,13 @@ const TaskDetail = (props: RouteComponentProps) => {
   };
   // Assign user modal related
   const openAssignUserModal = (type?: OrgTypes) => {
-    if (type) {
+    if (!currentOrgType) {
       setCurrentOrgType(type);
     }
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
-    setCurrentOrgType(null);
+    // setCurrentOrgType(null);
     setAssignUserModalOpen(false);
   };
   const handleStepAction = useCallback((step: Step) => {
@@ -180,7 +180,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
       // eslint-disable-next-line no-console
-      console.log(assignee, shouldAlertAssignee);
+      console.log(currentOrgType, assignee, shouldAlertAssignee);
       // handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [],
