@@ -3,6 +3,7 @@ const routes = {
   login: () => '/login',
   terms: () => '/terms',
   repository_list: () => '/repositories',
+  dashboard: () => '/dashboard',
   repository_detail: (repositorySlug: string) =>
     `/repositories/${repositorySlug}`,
   project_detail: (repositorySlug: string, projectSlug: string) =>
@@ -21,6 +22,7 @@ export const routePatterns = {
   terms: () => '/terms',
   auth_error: () => '/accounts/*',
   repository_list: () => '/repositories',
+  dashboard: () => '/dashboard',
   repository_detail: () => '/repositories/:repositorySlug',
   project_detail: () => '/repositories/:repositorySlug/:projectSlug',
   task_detail: () => '/repositories/:repositorySlug/:projectSlug/:taskSlug',

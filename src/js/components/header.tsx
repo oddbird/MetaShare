@@ -2,7 +2,7 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
 import OfflineAlert from '@/components/offlineAlert';
@@ -13,15 +13,35 @@ import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
 const Header = () => {
+  const location = useLocation();
   const user = useSelector(selectUserState);
   const socket = useSelector(selectSocketState);
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
+      <ul className="slds-list_horizontal header-nav">
+        <li>
+          <NavLink
+            to={routes.dashboard()}
+            activeClassName="slds-text-link"
+            className="slds-m-right_x-large slds-text-link_reset"
+          >
+            Dashboard
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to={routes.repository_list()}
+            activeClassName="slds-text-link"
+            className="slds-m-right_x-large slds-text-link_reset"
+          >
+            Repositories
+          </NavLink>
+        </li>
+      </ul>
       <UserInfo />
     </PageHeaderControl>
   );
-
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}

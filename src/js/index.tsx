@@ -24,6 +24,7 @@ import logger from 'redux-logger';
 import thunk, { ThunkDispatch } from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
+import DashboardDetail from '@/components/dashboard/detail';
 import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
@@ -78,6 +79,11 @@ const App = withRouter(
                     exact
                     path={routePatterns.home()}
                     render={() => <Redirect to={routes.repository_list()} />}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.dashboard()}
+                    component={DashboardDetail}
                   />
                   <PrivateRoute
                     exact
